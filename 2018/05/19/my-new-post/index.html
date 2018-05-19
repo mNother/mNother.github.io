@@ -1,212 +1,107 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
+{% extends "_layout.njk" %}
 
-  
-  <title>我的第一个github博客 | mNother&#39;s blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="#我的第一篇github博客 ##我的第一篇github博客1helloWorld">
-<meta name="keywords" content="博客,技术">
-<meta property="og:type" content="article">
-<meta property="og:title" content="我的第一个github博客">
-<meta property="og:url" content="http://yoursite.com/2018/05/19/my-new-post/index.html">
-<meta property="og:site_name" content="mNother&#39;s blog">
-<meta property="og:description" content="#我的第一篇github博客 ##我的第一篇github博客1helloWorld">
-<meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-05-19T06:25:21.338Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="我的第一个github博客">
-<meta name="twitter:description" content="#我的第一篇github博客 ##我的第一篇github博客1helloWorld">
-  
-    <link rel="alternate" href="/atom.xml" title="mNother&#39;s blog" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-</head>
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for("css/page.css") }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for("css/post.css") }}">
+{% endblock %}
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">mNother&#39;s blog</a>
+{% block title %}{{ page.title }} | {{ config.title }}{% if config.subtitle %} - {{ config.subtitle }}{% endif %}{% endblock %}
+
+{% block content %}
+<section id="post" class="post">
+  {% set post = page %}
+  <article class="post-container card{% if theme.animate %} animate{% endif %}" itemscope itemtype="http://schema.org/Article">
+    <div class="post-block">
+      <link itemprop="mainEntityOfPage" href="{{ config.url }}{{ url_for(page.path) }}">
+      <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+       <meta itemprop="name" content="{{ config.author }}">
+       <meta itemprop="description" content="{{ config.description }}">
+       <meta itemprop="image" content="{{ url_for( theme.avatar) }}">
+      </span>
+      <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+       <meta itemprop="name" content="{{ config.title }}">
+      </span>
+    </div>
+    <header class="post-header">
+      <h1 class="post-title" itemprop="name headline">
+       <span class="{% if page.direction and page.direction.toLowerCase() === \"rtl\" %} rtl{% endif %}">{{ page.title }}</span>
       </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="/" id="subtitle">never giveup reading</a>
-        </h2>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      <div class="post-meta">
+        {% if page.date %}
+        <span class="post-date">
+          <i class="far fa-calendar-plus"></i><span><time title="post-date" itemprop="dateCreated datePublished" datetime="{{ moment(post.date).format() }}">{{ date(post.date, config.date_format) }} {{ time(post.date, config.time_format) }}</time></span>
+        </span>
+        {% endif %}
+        {% if page.categories and page.categories.toArray().length %}
+        {% if page.date %}
+        <span class="post-meta-divider divider">|</span>
+        {% endif %}
+        <span class="post-categories">
+          {# About `-`: https://mozilla.github.io/nunjucks/cn/templating.html#part-861ece9d8e5ce60c #}
+          {% for cat in page.categories.toArray() -%}
+          {% if loop.first %}<i class="far fa-folder-open"></i>{% else %}<i class="fas fa-angle-right"></i>{% endif %}<span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="{{ url_for(cat.path) }}" itemprop="url" rel="index"><span itemprop="name">{{ cat.name }}</span></a></span>
+          {%- endfor %}
+        </span>
+        {% endif %}
+        {% if page.comment !== false and theme.comment.enable %}
+        {% if theme.comment.hypercomments_id %}
+        {% if page.categories or page.date %}
+        <span class="post-meta-divider divider">|</span>
+        {% endif %}
+        <span class="post-comment-count">
+          <i class="far fa-comments"></i><span><a href="{{ url_for(page.path) }}#comments" itemprop="discussionUrl"><span class="post-comment-count hc-comment-count" data-xid="{{ page.path }}" itemprop="commentsCount"></span></a></span>
+        </span>
+        {% elif theme.comment.disqus_shortname %}
+        {% if page.categories or page.date %}
+        <span class="post-meta-divider divider">|</span>
+        {% endif %}
+        <span class="post-comment-count">
+          <i class="far fa-comments"></i><span><a href="{{ url_for(page.path) }}#disqus_thread" itemprop="discussionUrl"><span class="post-comment-count disqus-comment-count" data-disqus-identifier="{{ page.path }}" itemprop="commentCount"></span></a></span>
+        </span>
+        {% endif %}
+        {% endif %}
       </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-my-new-post" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/05/19/my-new-post/" class="article-date">
-  <time datetime="2018-05-19T06:16:03.000Z" itemprop="datePublished">2018-05-19</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      我的第一个github博客
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>#我的第一篇github博客</p>
-<p>##我的第一篇github博客<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helloWorld</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/05/19/my-new-post/" data-id="cjhd0e04i0001s73b7lwvc3vb" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/博客/">博客</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术/">技术</a></li></ul>
-
+    </header>
+    <main class="post-body{% if theme.han %} han-init-context{% endif %}{% if page.direction and page.direction.toLowerCase() === \"rtl\" %} rtl{% endif %}" itemprop="articleBody">
+      {{ page.content }}
+    </main>
+    <footer class="post-footer">
+      {% if theme.alipay or theme.wechatpay %}
+      {% include "reward.njk" %}
+      {% endif %}
+      {% if page.tags and page.tags.toArray().length %}
+      <div class="post-tags">
+        {% if theme.tags_color %}
+        {% set colors = theme.tags_color %}
+        {% else %}
+        {% set colors = ["#fc6423", "#a3bb54", "#47aaff"] %}
+        {% endif %}
+        {% for tag in page.tags.toArray() %}
+        <a class="post-tag button" href="{{ url_for(tag.path) }}" style="background: {{ colors[loop.index0 % colors.length] }};" rel="tag"><i class="fas fa-tags"></i>{{ tag.name }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
     </footer>
+  </article>
+  {% if theme.reward %}
+  {% include "reward.njk" %}
+  {% endif %}
+  {% if page.prev or page.next %}
+  <div class="post-nav">
+    <div class="post-nav-next post-nav-item">
+      {% if page.next %}
+      <a href="{{ url_for(page.next.path) }}" rel="next" title="{{ page.next.title }}"><i class="fas fa-angle-left"></i><span class="nav-title">{{ page.next.title }}</span></a>
+      {% endif %}
+    </div>
+    <div class="post-nav-prev post-nav-item">
+      {% if page.prev %}
+      <a href="{{ url_for(page.prev.path) }}" rel="prev" title="{{ page.prev.title }}"><span class="nav-title">{{ page.prev.title }}</span><i class="fas fa-angle-right"></i></a>
+      {% endif %}
+    </div>
   </div>
-  
-    
-<nav id="article-nav">
-  
-  
-    <a href="/2018/05/19/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
-    </a>
-  
-</nav>
-
-  
-</article>
-
+  {% endif %}
+  {% if theme.comment.enable %}
+  {% include "comment.njk" %}
+  {% endif %}
 </section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/博客/">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术/">技术</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签云</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/博客/" style="font-size: 10px;">博客</a> <a href="/tags/技术/" style="font-size: 10px;">技术</a>
-    </div>
-  </div>
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">最新文章</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2018/05/19/my-new-post/">我的第一个github博客</a>
-          </li>
-        
-          <li>
-            <a href="/2018/05/19/hello-world/">Hello World</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2018 mNother<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-
-
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
-
-
-<script src="/js/script.js"></script>
-
-
-
-  </div>
-</body>
-</html>
+{% endblock %}
